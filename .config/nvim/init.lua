@@ -37,7 +37,10 @@ vim.o.confirm = true
 vim.opt.tabstop = 4      -- A tab displays as 4 spaces
 vim.opt.softtabstop = 4  -- Editing behaves as if tabs are 4 spaces
 vim.opt.shiftwidth = 4   -- An indent level is 4 spaces
-vim.opt.expandtab = true -- Convert tabs to spaces
+
+-- FOR PROJECT
+-- vim.opt.expandtab = true -- Convert tabs to spaces
+vim.opt.colorcolumn = "80"
 
 -- Keymaps
 
@@ -51,8 +54,36 @@ vim.keymap.set('n', '<leader>d', '<cmd>bdelete<CR>')
 
 vim.keymap.set('n', '-', '<cmd>Ex<CR>')
 
+vim.keymap.set('n', '<C-j>', ':m .+1<CR>==', { desc = 'Move line down' })
+vim.keymap.set('n', '<C-k>', ':m .-2<CR>==', { desc = 'Move line up' })
+
 
 
 require("onedark").setup({})
 
 vim.cmd("colorscheme onedark")
+
+
+-- Suppress lspconfig warning
+local original_notify = vim.notify
+vim.notify = function(msg, log_level, opts)
+  if msg and msg:find("nvim-lspconfig support", 1, true) then
+    return -- Intercept and discard this warning
+  end
+  original_notify(msg, log_level, opts)
+end
+
+require("lspconfig").clangd.setup({
+    cmd = {
+        "clangd",
+        "--background-index",
+        -- "--clang-tidy",
+    },
+
+    filetypes = {
+        "c",
+    },
+})
+
+-- LSP binds
+vim.keymap.set("n", "gd", vim.lsp.buf.definition, { desc = "Go to definition" })
